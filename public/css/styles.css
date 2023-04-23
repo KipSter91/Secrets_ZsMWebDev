@@ -9,8 +9,14 @@ body {
 }
 
 .secret-text {
+  border-radius: 5px;
   text-align: center;
   font-size: 2rem;
   color: #fff;
   background-color: #000;
+}
+
+footer {
+  color: rgba(0, 0, 0, 0.5);
+  text-align: center;
 }
