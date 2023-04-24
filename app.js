@@ -1,10 +1,11 @@
-require("dotenv").config();
+// require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const port = 3000;
 const mongoose = require("mongoose");
-const encrypt = require("mongoose-encryption");
+const md5 = require("md5");
+// const encrypt = require("mongoose-encryption");
 
 const app = express();
 
@@ -14,7 +15,6 @@ app.use(bodyParser.urlencoded({
 }));
 app.set('view engine', 'ejs');
 
-
 mongoose.connect("mongodb://127.0.0.1:27017/usersDB");
 
 const userSchema = new mongoose.Schema({
@@ -22,10 +22,10 @@ const userSchema = new mongoose.Schema({
     password: String
 });
 
-userSchema.plugin(encrypt, {
-    secret: process.env.SECRET,
-    encryptedFields: ['password']
-});
+// userSchema.plugin(encrypt, {
+//     secret: process.env.SECRET,
+//     encryptedFields: ['password']
+// });
 
 const User = mongoose.model("User", userSchema);
 
@@ -43,7 +43,7 @@ app.post("/login", (req, res) => {
             if (!foundUser) {
                 console.log("No user found.");
                 res.render("error");
-            } else if (foundUser.password === req.body.password) {
+            } else if (foundUser.password === md5(req.body.password)) {
                 console.log("User was successfully logged in.");
                 res.render("secrets");
             } else {
@@ -63,7 +63,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
     const newUser = new User({
         email: req.body.username,
-        password: req.body.password
+        password: md5(req.body.password)
     })
     User.findOne({ email: req.body.username })
         .then((existingUser) => {
