@@ -5,6 +5,8 @@ const ejs = require("ejs");
 const port = 3000;
 const mongoose = require("mongoose");
 const md5 = require("md5");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 // const encrypt = require("mongoose-encryption");
 
 const app = express();
@@ -39,42 +41,20 @@ app.get("/login", (req, res) => {
 
 app.post("/login", (req, res) => {
     User.findOne({ email: req.body.username })
-        .then(foundUser => {
+        .then((foundUser) => {
             if (!foundUser) {
                 console.log("No user found.");
                 res.render("error");
-            } else if (foundUser.password === md5(req.body.password)) {
-                console.log("User was successfully logged in.");
-                res.render("secrets");
             } else {
-                console.log("Incorrect password.");
-                res.render("error_password");
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-});
-
-app.get("/register", (req, res) => {
-    res.render("register")
-});
-
-app.post("/register", (req, res) => {
-    const newUser = new User({
-        email: req.body.username,
-        password: md5(req.body.password)
-    })
-    User.findOne({ email: req.body.username })
-        .then((existingUser) => {
-            if (existingUser) {
-                console.log(`User already exist with email: ${req.body.username}`);
-                res.render("exist")
-            } else {
-                newUser.save()
-                    .then(() => {
-                        console.log("Succesfully added a new user.");
-                        res.render("secrets");
+                bcrypt.compare(req.body.password, foundUser.password)
+                    .then((result) => {
+                        if (result) {
+                            console.log("User was successfully logged in.");
+                            res.render("secrets");
+                        } else {
+                            console.log("Incorrect password.");
+                            res.render("error_password");
+                        }
                     })
                     .catch((err) => {
                         console.log(err);
@@ -85,6 +65,85 @@ app.post("/register", (req, res) => {
             console.log(err);
         });
 });
+
+//refactor above code with async/await and catch block to handle errors
+// app.post("/login", async (req, res) => {
+//     try {
+//       const foundUser = await User.findOne({ email: req.body.username });
+//       if (!foundUser) {
+//         console.log("No user found.");
+//         return res.render("error");
+//       }
+//       const result = await bcrypt.compare(req.body.password, foundUser.password);
+//       if (result) {
+//         console.log("User was successfully logged in.");
+//         return res.render("secrets");
+//       } else {
+//         console.log("Incorrect password.");
+//         return res.render("error_password");
+//       }
+//     } catch (err) {
+//       console.log(err);
+//     }
+//   });
+
+app.get("/register", (req, res) => {
+    res.render("register")
+});
+//with Promises
+app.post("/register", (req, res) => {
+    bcrypt.hash(req.body.password, saltRounds)
+        .then((hash) => {
+            const newUser = new User({
+                email: req.body.username,
+                password: hash
+            })
+            User.findOne({ email: req.body.username })
+                .then((existingUser) => {
+                    if (existingUser) {
+                        console.log(`User already exist with email: ${req.body.username}`);
+                        res.render("exist")
+                    } else {
+                        newUser.save()
+                            .then(() => {
+                                console.log("Succesfully added a new user.");
+                                res.render("secrets");
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                            });
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+});
+
+//refactor above code with async/await and catch block to handle errors
+// app.post("/register", async (req, res) => {
+//     try {
+//         const hash = await bcrypt.hash(req.body.password, saltRounds);
+//         const newUser = new User({
+//             email: req.body.username,
+//             password: hash
+//         });
+//         const existingUser = await User.findOne({ email: req.body.username });
+//         if (existingUser) {
+//             console.log(`User already exist with email: ${req.body.username}`);
+//             res.render("exist")
+//         } else {
+//             await newUser.save();
+//             console.log("Successfully added a new user.");
+//             res.render("secrets");
+//         }
+//     } catch (err) {
+//         console.log(err);
+//     }
+// });
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
