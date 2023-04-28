@@ -1,31 +1,117 @@
-
-body {
-  background-color: #E8ECEF;
+* {
+  box-sizing: border-box;
 }
 
-.centered {
-    padding-top: 200px;
-    text-align: center;
+body {
+  --bg-color: #AEFEFF;
+  --text-color: #072227;
+  --extra-color: #4FBDBA;
+  --key-color: rgb(255, 250, 182);
+
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  margin: 0;
+  transition: background 0.2s linear;
+}
+
+body.dark {
+  --bg-color: #222831;
+  --text-color: #EEEEEE;
+  --extra-color: #4a505b;
+  --key-color: rgb(255, 241, 44);
+}
+
+.card {
+  background-color: var(--extra-color);
+}
+
+.fas {
+  color: var(--key-color);
 }
 
 .secret-text {
   border-radius: 5px;
   text-align: center;
-  font-size: 2rem;
-  color: #fff;
-  background-color: #000;
+  font-family: "Great Vibes", cursive;
+  font-size: 2.5rem;
+  color: var(--bg-color);
+  background-color: var(--text-color);
 }
 
 .copyright {
-  color: white;
+  color: var(--text-color);
   position: fixed;
   text-align: center;
   bottom: 0;
-  width: 100%;
-  height: 50px;
-  background-color: #212529;
+  width: 100vw;
+  height: 5vh;
+  background-color: var(--extra-color);
 }
 
 .register {
-  margin-top: 5px;
+  margin-top: 1vh;
+}
+
+.jumbotron {
+  background-color: var(--extra-color);
+}
+
+.label {
+  background-color: var(--text-color);
+  display: flex;
+  border-radius: 50px;
+  height: 26px;
+  width: 50px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5vh;
+  cursor: pointer;
+  transition: transform 0.2s linear;
+  transition-delay: 0.1s;
+  transform: scale(1);
+}
+
+.label:hover,
+.label:focus {
+  transform: scale(1.1);
+}
+
+.toogle {
+  display: flex;
+  position: absolute;
+  top: 2vh;
+  right: 2vh;
+}
+
+.checkbox {
+  opacity: 0;
+  position: relative;
+}
+
+.fa-moon {
+  color: rgb(234, 223, 79);
+}
+
+.fa-sun {
+  color: rgb(255, 136, 16);
+}
+
+.ball {
+  height: 22px;
+  width: 22px;
+  background-color: var(--bg-color);
+  position: absolute;
+  border-radius: 50%;
+  top: 2px;
+  right: 2px;
+  transition: transform 0.2s linear;
+}
+
+.checkbox:checked + .label .ball {
+  transform: translateX(-24px);
 }
