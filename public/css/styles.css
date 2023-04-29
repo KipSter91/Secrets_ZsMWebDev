@@ -14,7 +14,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 80vh;
+  height: 90vh;
   margin: 0;
   transition: background 0.2s linear;
 }
@@ -114,4 +114,8 @@ body.dark {
 
 .checkbox:checked + .label .ball {
   transform: translateX(-24px);
+}
+
+.container {
+  max-width: 650px;
 }

@@ -144,6 +144,10 @@ app.get("/error", (req, res) => {
     res.render("error")
 })
 
+app.get("/submit", (req,res) => {
+    res.render("submit")
+});
+
 app.post("/register", (req, res) => {
     User.register({ username: req.body.username }, req.body.password)
         .then(() => {
