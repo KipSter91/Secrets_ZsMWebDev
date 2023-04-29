@@ -7,7 +7,8 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
-var GoogleStrategy = require("passport-google-oauth20").Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 const findOrCreate = require("mongoose-findorcreate");
 
 const app = express();
@@ -33,7 +34,8 @@ mongoose.connect("mongodb://127.0.0.1:27017/usersDB");
 const userSchema = new mongoose.Schema({
     email: String,
     password: String,
-    googleId: String
+    googleId: String,
+    facebookId: String
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -66,7 +68,21 @@ passport.use(new GoogleStrategy({
 },
     function (accessToken, refreshToken, profile, cb) {
         console.log(profile);
-        User.findOrCreate({ googleId: profile.id }, function (err, user) {
+        User.findOrCreate({username: profile.id, googleId: profile.id }, function (err, user) {
+            return cb(err, user);
+        });
+    }
+));
+
+passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID,
+    clientSecret: process.env.FACEBOOK_APP_SECRET,
+    callbackURL: "http://localhost:3000/auth/facebook/secrets",
+    profileFields: ['id', 'displayName', 'photos', 'email']
+},
+    function (accessToken, refreshToken, profile, cb) {
+        console.log(profile);
+        User.findOrCreate({username: profile.id, facebookId: profile.id }, function (err, user) {
             return cb(err, user);
         });
     }
@@ -81,10 +97,20 @@ app.get("/auth/google",
     ));
 
 app.get("/auth/google/secrets",
-    passport.authenticate('google', { failureRedirect: '/error' }),
+    passport.authenticate("google", { failureRedirect: "/error" }),
     function (req, res) {
         // Successful authentication, redirect home.
-        res.redirect('/secrets');
+        res.redirect("/secrets");
+    });
+
+app.get("/auth/facebook",
+    passport.authenticate('facebook'));
+
+app.get("/auth/facebook/secrets",
+    passport.authenticate("facebook", { failureRedirect: "/error" }),
+    function (req, res) {
+        // Successful authentication, redirect home.
+        res.redirect("/secrets");
     });
 
 
@@ -92,7 +118,7 @@ app.get("/login", (req, res) => {
     res.render("login")
 });
 
-app.get('/logout', (req, res, next) => {
+app.get("/logout", (req, res, next) => {
     req.logout((err) => {
         if (err) {
             return next(err);
