@@ -81,7 +81,7 @@ body.dark {
   transform: scale(1.1);
 }
 
-.toogle {
+.toggle {
   display: flex;
   position: absolute;
   top: 2vh;
