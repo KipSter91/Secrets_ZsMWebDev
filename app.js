@@ -29,10 +29,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect(process.env.ATLAS_URL, {
-    useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+mongoose.connect(process.env.ATLAS_URL);
 
 const userSchema = new mongoose.Schema({
     email: String,
@@ -68,7 +65,7 @@ passport.deserializeUser(function (user, cb) {
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
+    callbackURL: "https://secrets-zsmwebdev.onrender.com/auth/google/secrets",
 },
     function (accessToken, refreshToken, profile, cb) {
         console.log(profile);
@@ -81,7 +78,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "http://localhost:3000/auth/facebook/secrets",
+    callbackURL: "https://secrets-zsmwebdev.onrender.com/auth/facebook/secrets",
     profileFields: ['id', 'displayName', 'photos', 'email']
 },
     function (accessToken, refreshToken, profile, cb) {
