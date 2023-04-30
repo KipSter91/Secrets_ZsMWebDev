@@ -29,7 +29,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect(process.env.ATLAS_URL);
+mongoose.connect(process.env.ATLAS_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
 
 const userSchema = new mongoose.Schema({
     email: String,
