@@ -29,13 +29,17 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect("mongodb://127.0.0.1:27017/usersDB");
+mongoose.connect(process.env.ATLAS_URL, {
+    useNewUrlParser: true,
+  useUnifiedTopology: true
+});
 
 const userSchema = new mongoose.Schema({
     email: String,
     password: String,
     googleId: String,
-    facebookId: String
+    facebookId: String,
+    secret: String
 });
 
 userSchema.plugin(passportLocalMongoose);
@@ -68,7 +72,7 @@ passport.use(new GoogleStrategy({
 },
     function (accessToken, refreshToken, profile, cb) {
         console.log(profile);
-        User.findOrCreate({username: profile.id, googleId: profile.id }, function (err, user) {
+        User.findOrCreate({ username: profile.id, googleId: profile.id }, function (err, user) {
             return cb(err, user);
         });
     }
@@ -82,7 +86,7 @@ passport.use(new FacebookStrategy({
 },
     function (accessToken, refreshToken, profile, cb) {
         console.log(profile);
-        User.findOrCreate({username: profile.id, facebookId: profile.id }, function (err, user) {
+        User.findOrCreate({ username: profile.id, facebookId: profile.id }, function (err, user) {
             return cb(err, user);
         });
     }
@@ -134,18 +138,48 @@ app.get("/register", (req, res) => {
 
 app.get("/secrets", (req, res) => {
     if (req.isAuthenticated()) {
-        res.render("secrets");
+        User.find({ secret: { $ne: null } })
+            .then((foundUser) => {
+                res.render("secrets", { usersWithSecrets: foundUser });
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     } else {
-        res.redirect("/login");
-    }
+        res.redirect("/");
+    };
+
 });
 
 app.get("/error", (req, res) => {
     res.render("error")
 })
 
-app.get("/submit", (req,res) => {
-    res.render("submit")
+app.get("/submit", (req, res) => {
+    if (req.isAuthenticated()) {
+        res.render("submit")
+    } else {
+        res.redirect("/");
+    };
+});
+
+app.post("/submit", (req, res) => {
+    const submittedSecret = req.body.secret;
+    User.findById(req.user.id)
+        .then((foundUser) => {
+            foundUser.secret = submittedSecret;
+            foundUser.save()
+                .then(() => {
+                    res.redirect("/secrets")
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+
 });
 
 app.post("/register", (req, res) => {
